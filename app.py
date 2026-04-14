@@ -73,7 +73,7 @@ if st.button("Predict Price"):
 
         result_df = pd.DataFrame({
             "Day": list(range(1, days_to_predict + 1)),
-            "Predicted Price (₹)": [f"₹{round(p,2)}" for p in preds]
+            "Predicted Price": preds
         })
 
         st.subheader("Predicted Prices")
@@ -101,7 +101,7 @@ if st.button("Predict Price"):
         # Green prediction line
         ax.plot(
             result_df["Day"],
-            result_df["Predicted Price (₹)"],
+            result_df["Predicted Price"],
             color="green",
             marker="o",
             linewidth=2
