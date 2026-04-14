@@ -81,6 +81,52 @@ if st.button("Predict Price"):
             "Day": list(range(1, days_to_predict + 1)),
             "Predicted Price": preds
         })
+        # -------------------------
+        # Save Predictions to Database
+        # -------------------------
+        
+        try:
+            save_df = result_df.copy()
+        
+            # Add vegetable column
+            save_df["vegetable"] = selected_veg
+        
+            # Get last known date
+            last_date = history_df["date"].iloc[-1]
+        
+            # Generate future dates
+            future_dates = pd.date_range(
+                start=last_date + pd.Timedelta(days=1),
+                periods=days_to_predict
+            )
+        
+            save_df["prediction_date"] = future_dates
+        
+            # Rename column
+            save_df.rename(
+                columns={
+                    "Predicted Price": "predicted_price"
+                },
+                inplace=True
+            )
+        
+            # Keep only required columns
+            save_df = save_df[
+                ["vegetable", "prediction_date", "predicted_price"]
+            ]
+        
+            # Save to Supabase
+            save_df.to_sql(
+                "predictions",
+                engine,
+                if_exists="append",
+                index=False
+            )
+        
+            st.success("Predictions saved to database ✅")
+        
+        except Exception as e:
+            st.error(f"Database save failed: {e}")
 
         st.subheader("Predicted Prices")
 
