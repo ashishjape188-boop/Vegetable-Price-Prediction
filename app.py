@@ -5,10 +5,11 @@ from sqlalchemy import create_engine
 import datetime
 
 # Load saved files
-model = joblib.load("vegetable_price_rf_model.pkl")
+model = joblib.load("vegetable_price_model.pkl")
+
 le = joblib.load("veg_label_encoder.pkl")
+
 features = joblib.load("model_features.pkl")
-accuracy_data = joblib.load("model_accuracy.pkl")
 
 # Load dataset
 df = pd.read_csv("vegetable_prices_final.csv")
