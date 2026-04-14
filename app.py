@@ -22,6 +22,8 @@ model = joblib.load("vegetable_price_model.pkl")
 encoder = joblib.load("veg_label_encoder.pkl")
 model_features = joblib.load("model_features.pkl")
 
+st.write(model_features)
+
 # Load dataset
 df = pd.read_csv("vegetable_features_ready.csv")
 
