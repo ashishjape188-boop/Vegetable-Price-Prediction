@@ -3,6 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from predict import predict_multiple_days
+from sqlalchemy import create_engine
+
+# Database connection
+DATABASE_URL = st.secrets["DATABASE_URL"]
+
+engine = create_engine(DATABASE_URL)
 
 
 # -----------------------------
