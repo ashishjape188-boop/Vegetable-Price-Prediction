@@ -12,7 +12,7 @@ le = joblib.load("veg_label_encoder.pkl")
 features = joblib.load("model_features.pkl")
 
 # Load dataset
-df = pd.read_csv("vegetable_prices_final.csv")
+df = pd.read_csv("vegetable_features_ready.csv")
 
 df["date"] = pd.to_datetime(
     df["date"],
