@@ -16,8 +16,11 @@ df = pd.read_csv("vegetable_features_ready.csv")
 
 df["date"] = pd.to_datetime(
     df["date"],
-    format="%d-%m-%Y"
+    format="%Y-%m-%d",
+    errors="coerce"
 )
+
+df = df.dropna(subset=["date"])
 
 # Prediction function
 def predict_multiple_days(
