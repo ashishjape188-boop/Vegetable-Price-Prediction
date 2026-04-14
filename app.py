@@ -58,6 +58,9 @@ def predict_multiple_days(veg_name, days):
         # Safe lag handling
         lag_1 = last_rows["price"].iloc[-1]
 
+        lag_2 = last_rows["price"].iloc[-2] if len(last_rows) >= 2 else lag_1
+        lag_3 = last_rows["price"].iloc[-3] if len(last_rows) >= 3 else lag_1
+
         lag_7 = (
             last_rows["price"].iloc[-7]
             if len(last_rows) >= 7
@@ -70,6 +73,12 @@ def predict_multiple_days(veg_name, days):
             else lag_1
         )
 
+        lag_21 = (
+            last_rows["price"].iloc[-21]
+            if len(last_rows) >= 21
+            else lag_1
+        )
+
         lag_30 = (
             last_rows["price"].iloc[-30]
             if len(last_rows) >= 30
@@ -77,21 +86,44 @@ def predict_multiple_days(veg_name, days):
         )
 
         # Create input dictionary
+        # Create input dictionary
         input_dict = {
+        
             "veg_code": veg_code,
+        
             "lag_1": lag_1,
+            "lag_2": lag_2,
+            "lag_3": lag_3,
             "lag_7": lag_7,
             "lag_14": lag_14,
+            "lag_21": lag_21,
             "lag_30": lag_30,
+        
             "day": next_date.day,
             "month": next_date.month,
-            "weekday": next_date.weekday()
+            "year": next_date.year,
+            "weekday": next_date.weekday(),
+        
+            "rolling_mean_7": (
+                last_rows["price"].tail(7).mean()
+                if len(last_rows) >= 7
+                else lag_1
+            ),
+        
+            "rolling_std_7": (
+                last_rows["price"].tail(7).std()
+                if len(last_rows) >= 7
+                else 0
+            ),
+        
+            "price_diff": lag_1 - lag_2
         }
 
         # Convert to dataframe
         input_data = pd.DataFrame([input_dict])
 
-        # Ensure correct order
+        input_data = input_data.fillna(0)
+        
         input_data = input_data[model_features]
 
         # Predict
