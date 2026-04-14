@@ -127,19 +127,29 @@ def predict_multiple_days(veg_name, days):
         input_data = input_data[model_features]
 
         # Predict
-        pred_price = model.predict(input_data)[0]
+        raw_pred = model.predict(input_data)[0]
 
-        st.write("Raw prediction:", pred_price)
+        st.write("Raw prediction:", raw_pred)
         
-        pred_price = max(1, min(pred_price, 500))
-
-        predictions.append(float(pred_price))
-
-        # Update dataframe for next step
+        # Use raw value for recursion
         new_row = {
             "date": next_date,
-            "price": pred_price
+            "price": raw_pred
         }
+        
+        last_rows = pd.concat(
+            [last_rows, pd.DataFrame([new_row])],
+            ignore_index=True
+        )
+        
+        last_rows = last_rows.tail(30)
+        
+        current_date = next_date
+        
+        # Clip only for display
+        display_price = max(1, min(raw_pred, 500))
+        
+        predictions.append(float(display_price))
 
         last_rows = pd.concat(
             [last_rows, pd.DataFrame([new_row])],
