@@ -1,124 +1,119 @@
+# app.py
+
 import streamlit as st
-import joblib
 import pandas as pd
+import numpy as np
+import joblib
+from datetime import datetime
 from sqlalchemy import create_engine
 import datetime
 
-# Load saved files
-model = joblib.load("vegetable_price_model.pkl")
+# -------------------------------
+# PAGE SETTINGS
+# -------------------------------
 
-le = joblib.load("veg_label_encoder.pkl")
-
-features = joblib.load("model_features.pkl")
-
-# Load dataset
-df = pd.read_csv("vegetable_features_ready.csv")
-
-df["date"] = pd.to_datetime(
-    df["date"],
-    format="%Y-%m-%d",
-    errors="coerce"
+st.set_page_config(
+    page_title="Vegetable Price Predictor",
+    layout="centered"
 )
 
-df = df.dropna(subset=["date"])
+st.title("🥕 Vegetable Price Prediction App")
 
-# Prediction function
-def predict_multiple_days(
-        vegetable,
-        days_ahead):
+st.write(
+    "Predict next-day vegetable prices using Machine Learning."
+)
 
-    predictions = []
+# -------------------------------
+# LOAD MODEL FILES
+# -------------------------------
 
-    veg_df = df[
-        df["vegetable"] == vegetable
-    ].sort_values("date")
+@st.cache_resource
+def load_model():
 
-    last_row = veg_df.iloc[-1]
+    model = joblib.load("vegetable_price_model.pkl")
 
-    lag_1  = last_row["price"]
-    lag_7  = veg_df.iloc[-7]["price"]
-    lag_14 = veg_df.iloc[-14]["price"]
-    lag_30 = veg_df.iloc[-30]["price"]
+    features = joblib.load("model_features.pkl")
 
-    day      = last_row["date"].day
-    month    = last_row["date"].month
-    weekday  = last_row["date"].weekday()
+    encoder = joblib.load("veg_label_encoder.pkl")
 
-    veg_code = le.transform([vegetable])[0]
+    data = pd.read_csv("vegetable_features_ready.csv")
 
-    for i in range(days_ahead):
+    data["date"] = pd.to_datetime(data["date"])
 
-        input_data = pd.DataFrame([[
-            veg_code,
-            lag_1,
-            lag_7,
-            lag_14,
-            lag_30,
-            day,
-            month,
-            weekday
-        ]], columns=features)
-
-        predicted_price = model.predict(
-            input_data
-        )[0]
-
-        predicted_price = float(
-            round(predicted_price, 2)
-        )
-
-        predictions.append(predicted_price)
-
-        lag_30 = lag_14
-        lag_14 = lag_7
-        lag_7  = lag_1
-        lag_1  = predicted_price
-
-    return predictions
+    return model, features, encoder, data
 
 
-# ---------------- UI ----------------
+model, features, encoder, df = load_model()
 
-st.title("🥦 Vegetable Price Prediction Dashboard")
+# -------------------------------
+# USER INPUT
+# -------------------------------
 
-vegetables = list(le.classes_)
+vegetables = sorted(df["vegetable"].unique())
 
-selected_veg = st.selectbox(
+veg_name = st.selectbox(
     "Select Vegetable",
     vegetables
 )
 
-days = st.slider(
-    "Select number of days to predict",
-    1,
-    30,
-    7
+# -------------------------------
+# GET LATEST DATA
+# -------------------------------
+
+veg_df = df[df["vegetable"] == veg_name]
+
+veg_df = veg_df.sort_values("date")
+
+latest_row = veg_df.iloc[-1].copy()
+
+# Encode vegetable
+veg_code = encoder.transform([veg_name])[0]
+
+latest_row["veg_code"] = veg_code
+
+# -------------------------------
+# DATE INPUT
+# -------------------------------
+
+selected_date = st.date_input(
+    "Select Prediction Date",
+    datetime.today()
 )
+
+latest_row["day"] = selected_date.day
+latest_row["month"] = selected_date.month
+latest_row["weekday"] = selected_date.weekday()
+
+# -------------------------------
+# PREDICT BUTTON
+# -------------------------------
 
 if st.button("Predict Price"):
 
-    preds = predict_multiple_days(
-        selected_veg,
-        days
-    )
+    try:
 
-    st.success("Prediction Complete!")
+        input_data = pd.DataFrame(
+            [latest_row[features]]
+        )
 
-    st.subheader("Predicted Prices")
+        prediction = model.predict(input_data)[0]
 
-    st.write(preds)
+        st.success(
+            f"💰 Predicted Price of {veg_name}: ₹ {prediction:.2f}"
+        )
 
-    st.subheader("Model Accuracy")
+    except Exception as e:
 
-    st.write(
-        f"{accuracy_data['test_accuracy']:.2f}%"
-    )
+        st.error("Prediction failed.")
+        st.write(e)
 
-    chart_df = pd.DataFrame({
-        "Day": list(range(1, days+1)),
-        "Predicted Price": preds
-    })
 
-    st.line_chart(
-        chart_df.set_index("Day")
+# -------------------------------
+# SHOW LATEST DATA
+# -------------------------------
+
+with st.expander("Show Latest Data"):
+
+    st.dataframe(
+        veg_df.tail(10)
     )
