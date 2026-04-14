@@ -23,7 +23,7 @@ encoder = joblib.load("veg_label_encoder.pkl")
 model_features = joblib.load("model_features.pkl")
 
 # Load dataset
-df = pd.read_csv("vegetable_prices_final.csv")
+df = pd.read_csv("vegetable_features_ready.csv")
 
 # Fix date parsing
 df["date"] = pd.to_datetime(
