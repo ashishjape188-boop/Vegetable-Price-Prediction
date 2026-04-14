@@ -92,7 +92,7 @@ if st.button("Predict Price"):
             save_df["vegetable"] = selected_veg
         
             # Get last known date
-            last_date = history_df["date"].iloc[-1]
+            last_date = df["date"].max()
         
             # Generate future dates
             future_dates = pd.date_range(
