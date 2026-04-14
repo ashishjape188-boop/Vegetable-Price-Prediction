@@ -73,7 +73,7 @@ if st.button("Predict Price"):
 
         result_df = pd.DataFrame({
             "Day": list(range(1, days_to_predict + 1)),
-            "Predicted Price": preds
+            "Predicted Price (₹)": [f"₹{round(p,2)}" for p in preds]
         })
 
         st.subheader("Predicted Prices")
@@ -84,7 +84,7 @@ if st.button("Predict Price"):
             st.dataframe(
                 result_df,
                 use_container_width=True
-    )
+        )
 
         # -------------------------
         # Clean Green Chart Styling
