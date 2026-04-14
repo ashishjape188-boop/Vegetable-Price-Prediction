@@ -125,12 +125,12 @@ def predict_multiple_days(veg_name, days):
         input_data = input_data.fillna(0)
         
         input_data = input_data[model_features]
-        st.write(input_data)
 
         # Predict
         pred_price = model.predict(input_data)[0]
 
-        # Keep predictions realistic
+        st.write("Raw prediction:", pred_price)
+        
         pred_price = max(1, min(pred_price, 500))
 
         predictions.append(float(pred_price))
