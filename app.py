@@ -101,7 +101,7 @@ if st.button("Predict Price"):
         # Green prediction line
         ax.plot(
             result_df["Day"],
-            result_df["Predicted Price"],
+            result_df["Predicted Price (₹)"],
             color="green",
             marker="o",
             linewidth=2
