@@ -25,6 +25,7 @@ model_features = joblib.load("model_features.pkl")
 
 # Load dataset
 df = pd.read_csv("vegetable_features_ready.csv")
+st.write(df.shape)
 
 # Fix date parsing
 df["date"] = pd.to_datetime(
