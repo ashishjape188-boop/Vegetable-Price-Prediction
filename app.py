@@ -129,6 +129,9 @@ def predict_multiple_days(veg_name, days):
         # Predict
         pred_price = model.predict(input_data)[0]
 
+        # Keep predictions realistic
+        pred_price = max(1, min(pred_price, 500))
+
         predictions.append(float(pred_price))
 
         # Update dataframe for next step
